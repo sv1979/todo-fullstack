@@ -1,0 +1,17 @@
+{
+  "name": "todo-fullstack",
+  "version": "1.0.0",
+  "main": "index.js",
+"scripts": {
+  "start": "node server/index.js",
+  "build": "cd client && npm install && npm run build",
+  "develop": "concurrently \"cd server && npm run dev\" \"cd client && npm start\""
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
