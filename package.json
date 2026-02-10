@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
 "scripts": {
+  "build": "npm install --prefix server && npm run build --prefix client",
   "start": "node server/index.js",
-  "build": "cd client && npm install && npm run build",
   "develop": "concurrently \"cd server && npm run dev\" \"cd client && npm start\""
 },
   "keywords": [],
