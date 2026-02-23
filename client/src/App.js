@@ -28,13 +28,19 @@ function App() {
     setText('');
   };
 
+  const deleteTodo = async (id) => {
+    await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+    // Update the UI by filtering out the deleted todo
+    setTodos(todos.filter(todo => todo._id !== id));
+  };
+
   return (
     <div style={{ padding: '50px' }}>
       <h1>My Fullstack Todo</h1>
       <form onSubmit={addTodo}>
-        <input 
-          value={text} 
-          onChange={(e) => setText(e.target.value)} 
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
           placeholder="What needs to be done?"
         />
         <button type="submit">Add Todo</button>
@@ -42,7 +48,10 @@ function App() {
 
       <ul>
         {todos.map(todo => (
-          <li key={todo.id}>{todo.text}</li>
+          <div key={todo._id}>
+            <span>{todo.text}</span>
+            <button onClick={() => deleteTodo(todo._id)}>Delete</button>
+          </div>
         ))}
       </ul>
     </div>
