@@ -34,6 +34,13 @@ function App() {
     setTodos(todos.filter(todo => todo._id !== id));
   };
 
+  const toggleTodo = async (id) => {
+    const response = await fetch(`/api/todos/${id}`, { method: 'PATCH' });
+    const updated = await response.json();
+    // Update the specific todo in our state
+    setTodos(todos.map(t => t._id === id ? updated : t));
+  };
+
   return (
     <div style={{ padding: '50px' }}>
       <h1>My Fullstack Todo</h1>
@@ -48,10 +55,18 @@ function App() {
 
       <ul>
         {todos.map(todo => (
-          <div key={todo._id}>
-            <span>{todo.text}</span>
+          <li key={todo._id} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+            <span
+              onClick={() => toggleTodo(todo._id)}
+              style={{
+                textDecoration: todo.completed ? 'line-through' : 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {todo.text}
+            </span>
             <button onClick={() => deleteTodo(todo._id)}>Delete</button>
-          </div>
+          </li>
         ))}
       </ul>
     </div>

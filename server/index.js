@@ -37,6 +37,26 @@ app.post('/api/todos', async (req, res) => {
   }
 });
 
+app.delete('/api/todos/:id', async (req, res) => {
+  try {
+    await Todo.findByIdAndDelete(req.params.id);
+    res.json({ message: "Todo deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.patch('/api/todos/:id', async (req, res) => {
+  try {
+    const todo = await Todo.findById(req.params.id);
+    todo.completed = !todo.completed; // Flip the status
+    const updatedTodo = await todo.save();
+    res.json(updatedTodo);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
