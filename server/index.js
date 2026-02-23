@@ -57,6 +57,20 @@ app.patch('/api/todos/:id', async (req, res) => {
   }
 });
 
+app.put('/api/todos/:id', async (req, res) => {
+  try {
+    const { text } = req.body;
+    const updatedTodo = await Todo.findByIdAndUpdate(
+      req.params.id, 
+      { text }, 
+      { new: true } // This returns the modified document rather than the original
+    );
+    res.json(updatedTodo);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

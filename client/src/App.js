@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   // 1. GET data from Node.js
   useEffect(() => {
@@ -41,6 +43,18 @@ function App() {
     setTodos(todos.map(t => t._id === id ? updated : t));
   };
 
+  const updateTodoText = async (id) => {
+    const response = await fetch(`/api/todos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: editText })
+    });
+    const updated = await response.json();
+    
+    setTodos(todos.map(t => t._id === id ? updated : t));
+    setEditingId(null); // Exit edit mode
+  };
+
   return (
     <div style={{ padding: '50px' }}>
       <h1>My Fullstack Todo</h1>
@@ -54,20 +68,34 @@ function App() {
       </form>
 
       <ul>
-        {todos.map(todo => (
-          <li key={todo._id} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-            <span
-              onClick={() => toggleTodo(todo._id)}
-              style={{
-                textDecoration: todo.completed ? 'line-through' : 'none',
-                cursor: 'pointer'
-              }}
-            >
-              {todo.text}
-            </span>
-            <button onClick={() => deleteTodo(todo._id)}>Delete</button>
-          </li>
-        ))}
+{todos.map(todo => (
+  <li key={todo._id}>
+    {editingId === todo._id ? (
+      <>
+        <input 
+          value={editText} 
+          onChange={(e) => setEditText(e.target.value)} 
+        />
+        <button onClick={() => updateTodoText(todo._id)}>Save</button>
+        <button onClick={() => setEditingId(null)}>Cancel</button>
+      </>
+    ) : (
+      <>
+        <span 
+          onClick={() => toggleTodo(todo._id)}
+          style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+        >
+          {todo.text}
+        </span>
+        <button onClick={() => {
+          setEditingId(todo._id);
+          setEditText(todo.text);
+        }}>Edit</button>
+        <button onClick={() => deleteTodo(todo._id)}>Delete</button>
+      </>
+    )}
+  </li>
+))}
       </ul>
     </div>
   );
