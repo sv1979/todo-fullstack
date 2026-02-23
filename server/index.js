@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config(); // Loads our secret password
+const Todo = require('./models/Todo'); // Import our Schema
 
 const app = express();
 const PORT = process.env.PORT || 5000; // Render will provide the PORT in production
@@ -9,28 +12,29 @@ app.use(cors());
 app.use(express.json()); // This allows us to parse JSON bodies in POST requests
 const path = require('path');
 
-let todos = [
-  { id: 1, text: 'Learn how Node works', completed: false },
-  { id: 2, text: 'Build a fullstack app', completed: false }
-];
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("Connected to MongoDB Atlas!"))
+  .catch(err => console.error("Could not connect:", err));
 
-app.get('/api/todos', (req, res) => {
-  console.log('GET request received: Sending todos');
-  res.json(todos);
+app.get('/api/todos', async (req, res) => {
+  try {
+    const todos = await Todo.find(); // .find() gets everything
+    res.json(todos);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-app.post('/api/todos', (req, res) => {
-  const newTodo = {
-    id: Date.now(), // Simple way to generate a unique ID
-    text: req.body.text,
-    completed: false
-  };
-
-  todos.push(newTodo);
-  console.log('POST request received: Added', newTodo);
-
-  // We return the newly created object (Standard Practice)
-  res.status(201).json(newTodo);
+app.post('/api/todos', async (req, res) => {
+  try {
+    const newTodo = new Todo({
+      text: req.body.text
+    });
+    const savedTodo = await newTodo.save(); // Saves to the cloud
+    res.status(201).json(savedTodo);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
 app.listen(PORT, () => {
