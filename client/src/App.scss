@@ -1,0 +1,60 @@
+// Variables
+$primary-color: #646cff;
+$delete-color: #ff4646;
+$bg-color: #f9f9f9;
+
+.app-container {
+  padding: 50px;
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+
+  h1 {
+    color: $primary-color;
+    text-align: center;
+  }
+
+  .todo-list {
+    list-style: none;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+      .todo-text {
+        flex-grow: 1;
+        cursor: pointer;
+
+        &.completed {
+          text-decoration: line-through;
+          color: #888;
+        }
+      }
+
+      button {
+        padding: 5px 10px;
+        cursor: pointer;
+
+        &.delete-btn {
+          background-color: $delete-color;
+          color: white;
+          border: none;
+        }
+      }
+    }
+  }
+
+  .stats-input {
+    margin-top: 20px;
+    padding: 10px;
+    background: #eee;
+    border-radius: 4px;
+  }
+}

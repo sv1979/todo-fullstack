@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const getAverageLength = require('./utilites/lib');
 require('dotenv').config(); // Loads our secret password
 const Todo = require('./models/Todo'); // Import our Schema
 
@@ -18,7 +19,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.get('/api/todos', async (req, res) => {
   try {
-    const todos = await Todo.find(); // .find() gets everything
+    const todos = await Todo.find().sort({ order: 1 }); // 1 for Ascending
     res.json(todos);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -27,8 +28,10 @@ app.get('/api/todos', async (req, res) => {
 
 app.post('/api/todos', async (req, res) => {
   try {
+    const count = await Todo.countDocuments();
     const newTodo = new Todo({
-      text: req.body.text
+      text: req.body.text,
+      order: count
     });
     const savedTodo = await newTodo.save(); // Saves to the cloud
     res.status(201).json(savedTodo);
@@ -71,6 +74,16 @@ app.put('/api/todos/:id', async (req, res) => {
   }
 });
 
+app.get('/api/get-length', async (req, res) => {
+  try {
+    const todos = await Todo.find(); 
+    const averageLength = getAverageLength(todos);
+    res.json({'average-length': averageLength });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
@@ -79,6 +92,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running!', timestamp: new Date() });
 });
 
+app.post('/api/todos/reorder', async (req, res) => {
+  try {
+    const { id1, order1, id2, order2 } = req.body;
+    
+    // Perform both updates
+    await Todo.findByIdAndUpdate(id1, { order: order1 });
+    await Todo.findByIdAndUpdate(id2, { order: order2 });
+    
+    res.json({ message: "Order updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
