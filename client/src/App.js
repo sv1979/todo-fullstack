@@ -9,11 +9,14 @@ function App() {
   const [wordLength, setWordLength] = useState(0);
   const [backend, setBackend] = useState('node');
 
-  const getUrl = useCallback((path) => {
-    return backend === 'node'
-      ? `http://localhost:5000/api${path}`
-      : `http://localhost:8000/python/api${path}`;
-  }, [backend]);
+const getUrl = useCallback((path) => {
+  const NODE_BASE = process.env.REACT_APP_NODE_URL || "http://localhost:5000";
+  const PYTHON_BASE = process.env.REACT_APP_PYTHON_URL || "http://localhost:8000";
+
+  return backend === 'node'
+    ? `${NODE_BASE}/api${path}`
+    : `${PYTHON_BASE}/python/api${path}`;
+}, [backend]);
 
   const refreshLength = useCallback(() => {
     fetch(getUrl('/get-length')) // Added slash

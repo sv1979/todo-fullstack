@@ -9,7 +9,12 @@ const app = express();
 const PORT = process.env.PORT || 5000; // Render will provide the PORT in production
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000", 
+    "https://todo-fullstack-c5dg.onrender.com"
+  ]
+}));
 app.use(express.json()); // This allows us to parse JSON bodies in POST requests
 const path = require('path');
 console.log("Checking MONGO_URI:", process.env.MONGO_URI ? "Found it!" : "Still undefined");
