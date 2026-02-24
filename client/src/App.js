@@ -21,6 +21,11 @@ function App() {
       .then(res => res.json())
       .then(data => setTodos(data))
       .catch(err => console.error("1. Backend not running?", err));
+
+    fetch('https://jsonplaceholder.typicode.com/posts')
+      .then((response) => response.json())
+      .then((json) => console.log(json));
+
   }, []);
 
   useEffect(() => {
