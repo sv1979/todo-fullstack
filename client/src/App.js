@@ -7,26 +7,41 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [wordLength, setWordLength] = useState(0);
+  const [backend, setBackend] = useState('node');
+
+  const getUrl = useCallback((path) => {
+    return backend === 'node'
+      ? `http://localhost:5000/api${path}`
+      : `http://localhost:8000/python/api${path}`;
+  }, [backend]);
 
   const refreshLength = useCallback(() => {
-    fetch('/api/get-length')
+    fetch(getUrl('/get-length')) // Added slash
       .then(res => res.json())
       .then(data => setWordLength(data['average-length']))
-      .catch(err => console.error("2. Backend not running?", err));
-  }, [])
+      .catch(err => console.error("Backend not responding", err));
+  }, [getUrl]);
+
+  const fetchTodos = useCallback(async () => {
+    try {
+      const response = await fetch(getUrl('/todos'));
+      const data = await response.json();
+      setTodos(data);
+    } catch (err) {
+      console.error("Fetch failed", err);
+    }
+  }, [getUrl]);
 
   // 1. GET data from Node.js
   useEffect(() => {
-    fetch('/api/todos')
-      .then(res => res.json())
-      .then(data => setTodos(data))
-      .catch(err => console.error("1. Backend not running?", err));
+    fetchTodos();
+    refreshLength();
 
     fetch('https://jsonplaceholder.typicode.com/posts')
       .then((response) => response.json())
       .then((json) => console.log(json));
 
-  }, []);
+  }, [backend, refreshLength, fetchTodos]);
 
   useEffect(() => {
     refreshLength()
@@ -37,7 +52,7 @@ function App() {
     e.preventDefault();
     if (!text) return;
 
-    const response = await fetch('/api/todos', {
+    const response = await fetch(getUrl('/todos'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })
@@ -49,20 +64,20 @@ function App() {
   };
 
   const deleteTodo = async (id) => {
-    await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+    await fetch(getUrl(`/todos/${id}`), { method: 'DELETE' });
     // Update the UI by filtering out the deleted todo
     setTodos(todos.filter(todo => todo._id !== id));
   };
 
   const toggleTodo = async (id) => {
-    const response = await fetch(`/api/todos/${id}`, { method: 'PATCH' });
+    const response = await fetch(getUrl(`/todos/${id}`), { method: 'PATCH' });
     const updated = await response.json();
     // Update the specific todo in our state
     setTodos(todos.map(t => t._id === id ? updated : t));
   };
 
   const updateTodoText = async (id) => {
-    const response = await fetch(`/api/todos/${id}`, {
+    const response = await fetch(getUrl(`/todos/${id}`), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: editText })
@@ -89,7 +104,7 @@ function App() {
     setTodos(newTodos);
 
     // 2. Persist to MongoDB
-    await fetch('/api/todos/reorder', {
+    await fetch(getUrl('/todos/reorder'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -104,6 +119,13 @@ function App() {
   return (
     <div className="app-container">
       <h1>My Fullstack Todo</h1>
+      <div className="backend-switcher">
+        <span>Current Engine: <strong>{backend.toUpperCase()}</strong></span>
+        <button onClick={() => setBackend(backend === 'node' ? 'python' : 'node')}>
+          Switch to {backend === 'node' ? 'Python' : 'Node'}
+        </button>
+      </div>
+
       <form onSubmit={addTodo}>
         <input
           value={text}
